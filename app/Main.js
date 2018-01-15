@@ -1,30 +1,28 @@
 import React from 'react';
 import VisitList from './VisitList';
 import Detail from "./Detail";
-import { visits } from "./../assets/mock-data.js";
-import { View, Text, Modal, TouchableHighlight} from 'react-native';
-export default class App extends React.Component {
-
+import { AsyncStorage, StatusBar, View, Text, Modal, TouchableHighlight, Button} from 'react-native';
+export default class Main extends React.Component {
+    static navigationOptions = {
+        title: 'Visitas'
+    };
 
     constructor(props) {
         super(props);
         this.state = {
-            visitaSeleccionada: null,
-            visits: visits,
-            visible: false,
+            visits: null,
         };
         this.visitaClickApp = this.visitaClickApp.bind(this);
-        this.editaParametros = this.editaParametros.bind(this);
-        this.volver = this.volver.bind(this);
+        this.peticionWeb = this.peticionWeb.bind(this);
+        this._descargadas = this._descargadas.bind(this);
+        this._borrarDescargadas = this._borrarDescargadas.bind(this);
     }
     componentDidMount(){
         this.peticionWeb()
+        StatusBar.setHidden(true);
     }
     visitaClickApp(visita) {
-        this.setState({
-            visitaSeleccionada: visita,
-            visible :true,
-        });
+        this.props.navigation.navigate('Detail', {visit: visita});
     }
     peticionWeb(){
 
@@ -38,38 +36,80 @@ export default class App extends React.Component {
 
             }
             else {
-                console.log("Error");
             }
             }.bind(this);
             xhr.open("GET", "https://dcrmt.herokuapp.com/api/visits/flattened?token=232a6ff08c235306c577", true);
             xhr.send();
+    }
+    async _borrarDescargadas(){
+        try {
+            await AsyncStorage.removeItem('@P7_2017_IWEB:visits');
+            this.setState({
+                    visits: ""
+            })
+            //peticionWeb();
+        } catch (error) {}
+
+    }
+    async _descargadas(){
+        try {
+            const visitas = await AsyncStorage.getItem('@P7_2017_IWEB:visits');
+            console.log("1");
+            let visitaas=JSON.parse(visitas);
+            if(visitaas===null){
+            this.setState({
+                    visits: ""
+            })
+            //peticionWeb();
+            return;
             }
 
-    editaParametros() {
-        let URL = 'https://dcrmt.herokuapp.com/api/visits/flattened?token=232a6ff08c235306c577';
-        let parametros = location.search;
-        let parametrosEditados = parametros.replace("?", "&");
-        return URL + parametrosEditados;
-    }
-    volver() {
-        this.setState({
-            visible : false,
-        });
-    }
+                this.setState({
+                    visits: JSON.parse(visitas)
+                })
+                console.log(this.state.visits);
+
+            
+        }
+        catch (error) {"Error saving data"}
+
+}
+
     render() {
+
+        const viewStyle = {
+            flex: 1,
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
+        const textStyle = {
+            fontWeight: 'bold',
+            fontSize: 28,
+        }
+        if(this.state.visits === null){
+            return (
+                <View style={viewStyle}>
+                <Text style={textStyle}>Cargando Visitas</Text>
+                </View>
+            );
+        }
+        if(this.state.visits === ""){
+            return (
+                <View>
+                <Button title="CRM" color="black" onPress={()=>{this.peticionWeb()}}/>
+                {/*<Button title="Descargadas"  color="black" onPress={()=>{this._descargadas()}}/>
+                <Button title="Borrar descargadas"  color="black" onPress={()=>{this._borrarDescargadas()}}/>*/}
+                    <Text style={textStyle}>No hay visitas almacenadas</Text>
+                </View>
+            );
+        }
         return (
             <View>
+                <Button title="CRM" color="black" onPress={()=>{this.peticionWeb()}}/>
+                <Button title="Descargadas"  color="black" onPress={()=>{this._descargadas()}}/>{/**/}
+                <Button title="Borrar descargadas"  color="black" onPress={()=>{this._borrarDescargadas()}}/>
                 <VisitList visits = {this.state.visits} visitaClickApp = {this.visitaClickApp}/>
-
-                <Modal animationType={"slide"} transparent={false} visible={this.state.visible}
-                           onRequestClose={()=>{alert("Usuario ha tocado el boton")}}>
-                    <View style={{padding:5, alignItems:'center', justifyContent:'center'}}>
-                        <TouchableHighlight style={{alignSelf:'flex-end'}} onPress={() => {this.volver()}}>
-                            <Text style={{fontSize:20, marginBottom: 20}}>Salir</Text>
-                        </TouchableHighlight>
-                            <Detail visitaSeleccionada={this.state.visitaSeleccionada}/>
-                    </View>
-                 </Modal>
 
             </View>
         );

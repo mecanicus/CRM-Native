@@ -15,12 +15,10 @@ export default class TargetElement extends React.Component {
             notes = "No hay notas";
         }
         return (
-            <View>
+            <View style={{borderBottomWidth: 0.5}}>
 
-                <Text> Compañía : {companyName}</Text>
-                    
-                <Text> Notes: {notes}</Text>
-                    
+                <Text> Compañía : {companyName}</Text>       
+                <Text> Notes: {notes}</Text>     
                 <Text> Web: {companyWeb}</Text>
                 
 

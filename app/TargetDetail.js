@@ -1,22 +1,23 @@
 import React from 'react';
 import TargetElement from "./TargetElement";
-import { View,Text } from 'react-native';
+import { View,Text, FlatList } from 'react-native';
 
 export default class TargetDetail extends React.Component {
     render() {
         let targets = this.props.targetDetail;
-        let target = targets.map((target2, index) => {
-            let mykey = "" + index;
-            return (
-                <TargetElement target = {target2} key={mykey} />
+        
+       return(
+                <View >
+                    <FlatList
+                        style={{}}
+                        data={targets}
+                        renderItem={
+                            ({item}) =>
+                            <TargetElement target={item}></TargetElement>
+                        }
+                        keyExtractor={item => item.id}
+                    />
+                </View>
             );
-        });
-        return (
-            <View>
-                <Text>
-                    {target}
-                </Text>
-            </View>
-        );
     }
 }

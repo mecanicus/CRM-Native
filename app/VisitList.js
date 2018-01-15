@@ -1,6 +1,6 @@
 import React from 'react';
 import VisitListElement from './VisitListElement';
-import { View,FlatList,Text, ListView } from 'react-native';
+import {AsyncStorage, StyleSheet,View,FlatList,Text, ListView } from 'react-native';
 export default class VisitList extends React.Component {
 
    render() {
